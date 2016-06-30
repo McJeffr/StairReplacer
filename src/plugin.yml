@@ -1,0 +1,18 @@
+name: StairReplacer
+version: 1.0
+description: This plugin allows a player to replace the materials of stairs (and slabs) without changing their rotation.
+author: McJeffr
+website: http://mcjeffr.com/
+depend: [WorldEdit]
+main: com.mcjeffr.stairreplacer.Main
+commands:
+    stairreplacer:
+        description: The main StairReplacer plugin command.
+        aliases: [sr, stairrep, srep]
+permissions:
+    stairreplacer.use:
+        description: Basic permission node to use the stairreplacer plugin.
+        default: op
+    stairreplacer.admin:
+        description: Admin permission node to manage the stairreplacer plugin.
+        default: op

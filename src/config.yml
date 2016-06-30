@@ -1,0 +1,5 @@
+limits:
+    max-block-change: 10000
+    max-undo-amount: 20
+misc:
+    prefix: '&eStairReplacer&8|| '
