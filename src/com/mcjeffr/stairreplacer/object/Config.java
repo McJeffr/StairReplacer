@@ -6,7 +6,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 /**
  * This method contains the object of Config. This object contains all the
  * values from the config file and it holds functions to reload this file or
- * fetch and store any information from the config file.
+ * fetch and store any information from the config file. This class contains a
+ * Singleton Design Pattern, meaning that the method Config#getInstance() needs
+ * to be used at all times to retrieve the config data.
  *
  * @author McJeffr
  */
@@ -17,27 +19,39 @@ public class Config {
     private int maxBlockChange, maxSnapshots;
     private String prefix;
 
+    /* Instance */
+    private static Config instance;
+
     /**
      * Constructor for the Config object. This constructor accepts the config
      * file of the StairReplacer plugin. No checks are in place to make sure the
      * correct configuration file is served, so check if it is.
-     *
-     * @param config The configuration file of the StairReplacer plugin.
      */
-    public Config(FileConfiguration config) {
-        this.config = config;
+    private Config() {
+        this.config = Main.getPlugin().getConfig();
         this.maxBlockChange = config.getInt("limits.max-block-change");
         this.maxSnapshots = config.getInt("limits.max-undo-amount");
         this.prefix = config.getString("misc.prefix");
     }
 
     /**
-     * This method reloads all the stored values from the configuration file.
+     * This method returns the instance of Config. If there is no instance yet
+     * initialized, it will return a new instance.
      *
-     * @param config The configuration file of the StairReplacer plugin.
+     * @return The instance of Config.
      */
-    public void reload(FileConfiguration config) {
-        this.config = config;
+    public static Config getInstance() {
+        if (instance == null) {
+            instance = new Config();
+        }
+        return instance;
+    }
+
+    /**
+     * This method reloads all the stored values from the configuration file.
+     */
+    public void reload() {
+        this.config = Main.getPlugin().getConfig();
         this.maxBlockChange = config.getInt("limits.max-block-change");
         this.maxSnapshots = config.getInt("limits.max-undo-amount");
         this.prefix = config.getString("misc.prefix");

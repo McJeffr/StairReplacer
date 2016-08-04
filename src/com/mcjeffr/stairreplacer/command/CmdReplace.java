@@ -3,17 +3,19 @@ package com.mcjeffr.stairreplacer.command;
 import com.mcjeffr.stairreplacer.Session;
 import com.mcjeffr.stairreplacer.enumeration.Stair;
 import com.mcjeffr.stairreplacer.enumeration.Step;
+import com.mcjeffr.stairreplacer.object.Config;
 import com.mcjeffr.stairreplacer.object.Subcommand;
+import com.mcjeffr.stairreplacer.object.Messenger;
 import com.mcjeffr.stairreplacer.util.Replacer;
 import com.mcjeffr.stairreplacer.util.TypeCheck;
 import com.sk89q.worldedit.bukkit.selections.Selection;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /**
- * This class contains the command executor for the "/sr r" command.
+ * This class contains the command executor for the "/sr replace" command.
  *
  * @author McJeffr
  */
@@ -29,79 +31,82 @@ public class CmdReplace extends Subcommand {
 
     @Override
     public void onCommand(CommandSender sender, Command cmd, String string, String[] args) {
+        Messenger messenger = Messenger.getInstance();
         if (!(sender instanceof Player)) {
-            sendMessage(sender, "&cOnly players can execute this command.");
+            messenger.sendMessage(sender, "err-not_a_player");
             return;
         }
         Player player = (Player) sender;
-        Selection selection = Session.getWorldEditSelection(player);
+        Selection selection = Session.getInstance().getWorldEditSelection(player);
+        Config config = Config.getInstance();
         if (selection == null) {
-            sendMessage(player, "&cMake a region selection first.");
+            messenger.sendMessage(player, "cmd-replace-no_selection");
             return;
         }
         if (args.length == 1) {
-            if (Stair.isStair(player.getItemInHand().getTypeId())
-                    || Step.isStep(player.getItemInHand().getTypeId(), player.getItemInHand().getData().getData())) {
-                int id = player.getItemInHand().getTypeId();
+            ItemStack inHand = player.getInventory().getItemInMainHand();
+            if (inHand != null) {
+                int id = inHand.getTypeId();
+                byte data = inHand.getData().getData();
                 if (Stair.isStair(id)) {
                     Stair stair = Stair.getById(id);
                     int amountReplaced = Replacer.replaceStairs(player, selection, null, stair);
                     if (amountReplaced == 0) {
-                        sendMessage(player, "&cNothing found to replace.");
-                    } else if (amountReplaced == Session.getConfig().getMaxBlockChange()) {
-                        sendMessage(player, "&cMaximum block change limit of &f" + Session.getConfig().getMaxBlockChange() + " &cblocks reached.");
+                        messenger.sendMessage(player, "cmd-replace-nothing_found");
+                    } else if (amountReplaced == config.getMaxBlockChange()) {
+                        messenger.sendMessage(player, "cmd-replace-limit_reached", Integer.toString(config.getMaxBlockChange()));
                     } else {
-                        sendMessage(player, "&6Replaced &e" + amountReplaced + " &6blocks.");
+                        messenger.sendMessage(player, "cmd-replace-replaced_blocks", Integer.toString(amountReplaced));
                     }
-                } else if (Step.isStep(id, player.getItemInHand().getData().getData())) {
-                    Step step = Step.getById(id, player.getItemInHand().getData().getData());
+                } else if (Step.isStep(id, data)) {
+                    Step step = Step.getById(id, data);
                     int amountReplaced = Replacer.replaceSteps(player, selection, null, step);
                     if (amountReplaced == 0) {
-                        sendMessage(player, "&cNothing found to replace.");
-                    } else if (amountReplaced == Session.getConfig().getMaxBlockChange()) {
-                        sendMessage(player, "&cMaximum block change limit of &f" + Session.getConfig().getMaxBlockChange() + " &cblocks reached.");
+                        messenger.sendMessage(player, "cmd-replace-nothing_found");
+                    } else if (amountReplaced == config.getMaxBlockChange()) {
+                        messenger.sendMessage(player, "cmd-replace-limit_reached", Integer.toString(config.getMaxBlockChange()));
                     } else {
-                        sendMessage(player, "&6Replaced &e" + amountReplaced + " &6blocks.");
+                        messenger.sendMessage(player, "cmd-replace-replaced_blocks", Integer.toString(amountReplaced));
                     }
                 } else {
-                    sendMessage(player, "&cHold the stair or slab you want to replace the stairs or slabs to in your hand.");
+                    messenger.sendMessage(player, "cmd-replace-hold_block");
                 }
+            } else {
+                messenger.sendMessage(player, "cmd-replace-hold_block");
             }
         } else if (args.length == 2) {
             String idAndData = args[1];
             int id = getId(idAndData);
             byte data = getData(idAndData);
             if (id == -1) {
-                sendMessage(player, "&cThe provided ID in &f" + idAndData + " &cis not a number "
-                        + "or is an invalid format. Supported formats: \"id\", \"id:data\" or \"id;data\".");
+                messenger.sendMessage(player, "cmd-replace-invalid_id", idAndData);
                 return;
             } else if (data == -1) {
-                sendMessage(player, "&cThe provided metadata in &f" + idAndData + " &cis not a number between 0-16 "
-                        + "or is an invalid format. Supported formats: \"id\", \"id:data\" or \"id;data\".");
+                messenger.sendMessage(player, "cmd-replace-invalid_data", idAndData);
                 return;
             }
             if (Stair.isStair(id)) {
                 Stair stair = Stair.getById(id);
                 int amountReplaced = Replacer.replaceStairs(player, selection, null, stair);
                 if (amountReplaced == 0) {
-                    sendMessage(player, "&cNothing found to replace.");
-                } else if (amountReplaced == Session.getConfig().getMaxBlockChange()) {
-                    sendMessage(player, "&cMaximum block change limit of &f" + Session.getConfig().getMaxBlockChange() + " &cblocks reached.");
+                    messenger.sendMessage(player, "cmd-replace-nothing_found");
+                } else if (amountReplaced == config.getMaxBlockChange()) {
+                    messenger.sendMessage(player, "cmd-replace-limit_reached", Integer.toString(config.getMaxBlockChange()));
                 } else {
-                    sendMessage(player, "&6Replaced &e" + amountReplaced + " &6blocks.");
+                    messenger.sendMessage(player, "cmd-replace-replaced_blocks", Integer.toString(amountReplaced));
                 }
             } else if (Step.isStep(id, data)) {
                 Step step = Step.getById(id, data);
                 int amountReplaced = Replacer.replaceSteps(player, selection, null, step);
                 if (amountReplaced == 0) {
-                    sendMessage(player, "&cNothing found to replace.");
-                } else if (amountReplaced == Session.getConfig().getMaxBlockChange()) {
-                    sendMessage(player, "&cMaximum block change limit of &f" + Session.getConfig().getMaxBlockChange() + " &cblocks reached.");
+                    messenger.sendMessage(player, "cmd-replace-nothing_found");
+                } else if (amountReplaced == config.getMaxBlockChange()) {
+                    messenger.sendMessage(player, "cmd-replace-limit_reached", Integer.toString(config.getMaxBlockChange()));
                 } else {
-                    sendMessage(player, "&6Replaced &e" + amountReplaced + " &6blocks.");
+                    messenger.sendMessage(player, "cmd-replace-replaced_blocks", Integer.toString(amountReplaced));
                 }
             } else {
-                sendMessage(player, "&cProvided ID and data &f" + idAndData + " &cis not a stair or a slab.");
+                messenger.sendMessage(player, "cmd-replace-invalid_block", idAndData);
             }
         } else {
             String fromIdAndData = args[1];
@@ -111,20 +116,16 @@ public class CmdReplace extends Subcommand {
             byte fromData = getData(fromIdAndData);
             byte toData = getData(toIdAndData);
             if (toId == -1) {
-                sendMessage(player, "&cThe provided ID in &f" + toIdAndData + " &cis not a number "
-                        + "or is an invalid format. Supported formats: \"id\", \"id:data\" or \"id;data\".");
+                messenger.sendMessage(player, "cmd-replace-invalid_id", toIdAndData);
                 return;
             } else if (fromId == -1) {
-                sendMessage(player, "&cThe provided ID in &f" + fromIdAndData + " &cis not a number "
-                        + "or is an invalid format. Supported formats: \"id\", \"id:data\" or \"id;data\".");
+                messenger.sendMessage(player, "cmd-replace-invalid_id", fromIdAndData);
                 return;
             } else if (toData == -1) {
-                sendMessage(player, "&cThe provided metadata in &f" + toIdAndData + " &cis not a number between 0-16 "
-                        + "or is an invalid format. Supported formats: \"id\", \"id:data\" or \"id;data\".");
+                messenger.sendMessage(player, "cmd-replace-invalid_data", toIdAndData);
                 return;
             } else if (fromData == -1) {
-                sendMessage(player, "&cThe provided metadata in &f" + toIdAndData + " &cis not a number between 0-16 "
-                        + "or is an invalid format. Supported formats: \"id\", \"id:data\" or \"id;data\".");
+                messenger.sendMessage(player, "cmd-replace-invalid_data", fromIdAndData);
                 return;
             }
             if (Stair.isStair(fromId) && Stair.isStair(toId)) {
@@ -132,26 +133,25 @@ public class CmdReplace extends Subcommand {
                 Stair toStair = Stair.getById(toId);
                 int amountReplaced = Replacer.replaceStairs(player, selection, fromStair, toStair);
                 if (amountReplaced == 0) {
-                    sendMessage(player, "&cNothing found to replace.");
-                } else if (amountReplaced == Session.getConfig().getMaxBlockChange()) {
-                    sendMessage(player, "&cMaximum block change limit of &f" + Session.getConfig().getMaxBlockChange() + " &cblocks reached.");
+                    messenger.sendMessage(player, "cmd-replace-nothing_found");
+                } else if (amountReplaced == config.getMaxBlockChange()) {
+                    messenger.sendMessage(player, "cmd-replace-limit_reached", Integer.toString(config.getMaxBlockChange()));
                 } else {
-                    sendMessage(player, "&6Replaced &e" + amountReplaced + " &6blocks.");
+                    messenger.sendMessage(player, "cmd-replace-replaced_blocks", Integer.toString(amountReplaced));
                 }
             } else if (Step.isStep(fromId, fromData) && Step.isStep(toId, toData)) {
                 Step fromStep = Step.getById(fromId, fromData);
                 Step toStep = Step.getById(toId, toData);
                 int amountReplaced = Replacer.replaceSteps(player, selection, fromStep, toStep);
                 if (amountReplaced == 0) {
-                    sendMessage(player, "&cNothing found to replace.");
-                } else if (amountReplaced == Session.getConfig().getMaxBlockChange()) {
-                    sendMessage(player, "&cMaximum block change limit of &f" + Session.getConfig().getMaxBlockChange() + " &cblocks reached.");
+                    messenger.sendMessage(player, "cmd-replace-nothing_found");
+                } else if (amountReplaced == config.getMaxBlockChange()) {
+                    messenger.sendMessage(player, "cmd-replace-limit_reached", Integer.toString(config.getMaxBlockChange()));
                 } else {
-                    sendMessage(player, "&6Replaced &e" + amountReplaced + " &6blocks.");
+                    messenger.sendMessage(player, "cmd-replace-replaced_blocks", Integer.toString(amountReplaced));
                 }
             } else {
-                sendMessage(player, "&cProvided ID and data &f" + fromIdAndData + "&c or &f"
-                        + toIdAndData + " &cis not a stair or a slab.");
+                messenger.sendMessage(player, "cmd-replace-invalid-blocks", new String[]{toIdAndData, fromIdAndData});
             }
         }
     }
@@ -216,17 +216,6 @@ public class CmdReplace extends Subcommand {
         } else {
             return 0;
         }
-    }
-
-    /**
-     * This method sends a (colored) message to a CommandSender.
-     *
-     * @param sender The CommandSender.
-     * @param message The message, with optional color codes indicated by the
-     * character '&'.
-     */
-    private void sendMessage(CommandSender sender, String message) {
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Session.getConfig().getPrefix() + message));
     }
 
 }

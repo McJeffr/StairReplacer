@@ -13,7 +13,7 @@
     <target name="-post-jar">
         <copy file="${dist.jar}" todir="../Jar Export"
             failonerror="true"/>
-        <copy file="${dist.jar}" todir="F://Minecraft Server Network/Qubion/plugins"
+        <copy file="${dist.jar}" todir="F://Minecraft Server Network/Qubion 1.10/plugins"
             failonerror="true"/>
     </target>
     <!--

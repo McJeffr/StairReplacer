@@ -3,6 +3,7 @@ package com.mcjeffr.stairreplacer.util;
 import com.mcjeffr.stairreplacer.Session;
 import com.mcjeffr.stairreplacer.enumeration.Stair;
 import com.mcjeffr.stairreplacer.enumeration.Step;
+import com.mcjeffr.stairreplacer.object.Config;
 import com.mcjeffr.stairreplacer.object.Snapshot;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 import java.util.HashMap;
@@ -46,7 +47,7 @@ public class Replacer {
                             if (Stair.isStair(world.getBlockAt(x, y, z).getTypeId())) {
                                 Block block = world.getBlockAt(x, y, z);
                                 if (!(Stair.getById(block.getTypeId()) == toStair)) {
-                                    if (amountReplaced >= Session.getConfig().getMaxBlockChange()) {
+                                    if (amountReplaced >= Config.getInstance().getMaxBlockChange()) {
                                         break;
                                     }
                                     com.mcjeffr.stairreplacer.object.Block changedBlock = replaceStair(block, fromStair, toStair);
@@ -61,7 +62,7 @@ public class Replacer {
                 }
             }
             if (amountReplaced != 0) {
-                Session.addSnapshot(player, new Snapshot(changedBlocks));
+                Session.getInstance().addSnapshot(player, new Snapshot(changedBlocks));
             }
         }
         return amountReplaced;
@@ -93,7 +94,7 @@ public class Replacer {
                             if (Step.isStep(world.getBlockAt(x, y, z).getTypeId(), world.getBlockAt(x, y, z).getData())) {
                                 Block block = world.getBlockAt(x, y, z);
                                 if (!(Step.getById(block.getTypeId(), block.getData()) == toStep)) {
-                                    if (amountReplaced >= Session.getConfig().getMaxBlockChange()) {
+                                    if (amountReplaced >= Config.getInstance().getMaxBlockChange()) {
                                         break;
                                     }
                                     boolean inverted = Step.isInverted(block.getTypeId(), block.getData());
@@ -109,7 +110,7 @@ public class Replacer {
                 }
             }
             if (amountReplaced != 0) {
-                Session.addSnapshot(player, new Snapshot(changedBlocks));
+                Session.getInstance().addSnapshot(player, new Snapshot(changedBlocks));
             }
         }
         return amountReplaced;

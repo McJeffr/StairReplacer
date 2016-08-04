@@ -9,38 +9,63 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 
 /**
  * This class stores any variables that need to exist during runtime, so they
- * can easily be accessed via getters and setters.
+ * can easily be accessed via getters and setters. This class is in the
+ * Singleton Design Pattern format, meaning there is an instance of Session
+ * during runtime that can be called upon.
  *
  * @author McJeffr
  */
 public class Session {
 
     /* Attributes */
-    private static WorldEditPlugin worldEditPlugin;
-    private static Map<UUID, List<Snapshot>> snapshots;
-    private static Config config;
+    private WorldEditPlugin worldEditPlugin;
+    private final Map<UUID, List<Snapshot>> SNAPSHOTS;
+
+    /* Instance */
+    private static Session instance;
+
+    /**
+     * Singleton Design Pattern private constructor.
+     */
+    private Session() {
+        worldEditPlugin = null;
+        SNAPSHOTS = new HashMap<>();
+        PluginManager pm = Bukkit.getPluginManager();
+        for (Plugin plugin : pm.getPlugins()) {
+            if (plugin instanceof WorldEditPlugin) {
+                worldEditPlugin = (WorldEditPlugin) plugin;
+                break;
+            }
+        }
+    }
+
+    /**
+     * This method will return the instance of the Session object. If this
+     * object has not yet been created, it will create a new Session object.
+     *
+     * @return
+     */
+    public static Session getInstance() {
+        if (instance == null) {
+            instance = new Session();
+        }
+        return instance;
+    }
 
     /**
      * This method gets the WorldEditPlugin instance.
      *
      * @return The WorldEditPlugin instance.
      */
-    public static WorldEditPlugin getWorldEditPlugin() {
-        return Session.worldEditPlugin;
-    }
-
-    /**
-     * This method sets the WorldEditPlugin instance.
-     *
-     * @param plugin The WorldEditPlugin instance.
-     */
-    public static void setWorldEditPlugin(WorldEditPlugin plugin) {
-        Session.worldEditPlugin = plugin;
+    public WorldEditPlugin getWorldEditPlugin() {
+        return worldEditPlugin;
     }
 
     /**
@@ -50,21 +75,12 @@ public class Session {
      * @return The Selection object, or null when the player does not have a
      * selection.
      */
-    public static Selection getWorldEditSelection(Player player) {
+    public Selection getWorldEditSelection(Player player) {
         Selection sel = null;
         if (worldEditPlugin != null) {
             sel = worldEditPlugin.getSelection(player);
         }
         return sel;
-    }
-
-    /**
-     * This method initializes the snapshot Map that stores the snapshots of
-     * several players, used in the undo command. Only use this method on plugin
-     * startup.
-     */
-    public static void initializeSnapshots() {
-        snapshots = new HashMap<>();
     }
 
     /**
@@ -76,13 +92,13 @@ public class Session {
      * @param snapshot The snapshot that needs to be added to the list of
      * snapshots of a player in the map of snapshots.
      */
-    public static void addSnapshot(Player player, Snapshot snapshot) {
-        if (!snapshots.containsKey(player.getUniqueId())) {
-            snapshots.put(player.getUniqueId(), new ArrayList<>());
+    public void addSnapshot(Player player, Snapshot snapshot) {
+        if (!SNAPSHOTS.containsKey(player.getUniqueId())) {
+            SNAPSHOTS.put(player.getUniqueId(), new ArrayList<Snapshot>());
         }
-        snapshots.get(player.getUniqueId()).add(snapshot);
-        if (snapshots.get(player.getUniqueId()).size() > config.getMaxSnapshots()) {
-            snapshots.get(player.getUniqueId()).remove(0);
+        SNAPSHOTS.get(player.getUniqueId()).add(snapshot);
+        if (SNAPSHOTS.get(player.getUniqueId()).size() > Config.getInstance().getMaxSnapshots()) {
+            SNAPSHOTS.get(player.getUniqueId()).remove(0);
         }
     }
 
@@ -96,10 +112,10 @@ public class Session {
      * snapshots of a player in the map of snapshots.
      * @return True if the snapshot was removed, false otherwise.
      */
-    public static boolean removeSnapshot(Player player, Snapshot snapshot) {
-        if (snapshots.containsKey(player.getUniqueId())) {
-            if (snapshots.get(player.getUniqueId()).contains(snapshot)) {
-                snapshots.get(player.getUniqueId()).remove(snapshot);
+    public boolean removeSnapshot(Player player, Snapshot snapshot) {
+        if (SNAPSHOTS.containsKey(player.getUniqueId())) {
+            if (SNAPSHOTS.get(player.getUniqueId()).contains(snapshot)) {
+                SNAPSHOTS.get(player.getUniqueId()).remove(snapshot);
                 return true;
             } else {
                 return false;
@@ -115,10 +131,10 @@ public class Session {
      * @param player The player of which the snapshot needs to be fetched.
      * @return The last registered snapshot, or null if nothing could be found.
      */
-    public static Snapshot getLastSnapshot(Player player) {
-        if (snapshots.containsKey(player.getUniqueId())) {
-            if (!(snapshots.get(player.getUniqueId()).isEmpty())) {
-                return snapshots.get(player.getUniqueId()).get(snapshots.get(player.getUniqueId()).size() - 1);
+    public Snapshot getLastSnapshot(Player player) {
+        if (SNAPSHOTS.containsKey(player.getUniqueId())) {
+            if (!(SNAPSHOTS.get(player.getUniqueId()).isEmpty())) {
+                return SNAPSHOTS.get(player.getUniqueId()).get(SNAPSHOTS.get(player.getUniqueId()).size() - 1);
             } else {
                 return null;
             }
@@ -134,32 +150,12 @@ public class Session {
      * @return The List of snapshots, or null if the player does not have any
      * snapshots registered yet.
      */
-    public static List<Snapshot> getSnapshots(Player player) {
-        if (snapshots.containsKey(player.getUniqueId())) {
-            return snapshots.get(player.getUniqueId());
+    public List<Snapshot> getSnapshots(Player player) {
+        if (SNAPSHOTS.containsKey(player.getUniqueId())) {
+            return SNAPSHOTS.get(player.getUniqueId());
         } else {
             return null;
         }
-    }
-
-    /**
-     * This method initializes the config. Only use this method on plugin
-     * startup.
-     *
-     * @param config The FileConfiguration object from where the config needs to
-     * be read from.
-     */
-    public static void initializeConfig(FileConfiguration config) {
-        Session.config = new Config(config);
-    }
-
-    /**
-     * Getter for the config of the plugin.
-     *
-     * @return The config of the plugin.
-     */
-    public static Config getConfig() {
-        return config;
     }
 
 }

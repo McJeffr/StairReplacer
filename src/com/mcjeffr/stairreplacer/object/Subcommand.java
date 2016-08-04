@@ -1,6 +1,6 @@
 package com.mcjeffr.stairreplacer.object;
 
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -43,8 +43,7 @@ public abstract class Subcommand {
      */
     public boolean executeCommand(CommandSender sender, Command cmd, String string, String[] args) {
         if (!sender.hasPermission(getPermission())) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&bgoBrush> &cYou do not have the &f" + getPermission() + " &cpermission."));
+            Messenger.getInstance().sendMessage(sender, "err-not_enough_permissions", getPermission());
             return false;
         } else {
             onCommand(sender, cmd, string, args);

@@ -1,9 +1,7 @@
 package com.mcjeffr.stairreplacer.object;
 
-import com.mcjeffr.stairreplacer.Session;
 import java.util.HashMap;
 import java.util.List;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -23,21 +21,19 @@ public class CommandManager implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length >= 1) {
-            boolean commandExists = false;
             for (List<String> s : COMMANDS.keySet()) {
                 if (s.contains(args[0])) {
                     COMMANDS.get(s).executeCommand(sender, cmd, label, args);
-                    commandExists = true;
+                    return true;
                 }
             }
-            if (!commandExists) {
-                sendMessage(sender, "&cUnknown subcommand &f" + args[0] + "&c.");
-                sendInfoMessage(sender);
-            }
+            Messenger.getInstance().sendMessage(sender, "err-unknown_subcommand", args[0]);
+            sendInfoMessage(sender);
+            return false;
         } else {
             sendInfoMessage(sender);
+            return false;
         }
-        return true;
     }
 
     /**
@@ -57,29 +53,20 @@ public class CommandManager implements CommandExecutor {
      * @param sender The CommandSender to send the message to.
      */
     private void sendInfoMessage(CommandSender sender) {
+        Messenger messenger = Messenger.getInstance();
         if (sender.hasPermission(PERMISSION_ADMIN)) {
-            sendMessage(sender, "&eAvailable subcommands:");
-            sendMessage(sender, "&e/sr &8[&ereplace &8OR &er&8] &e<from-id> <to-id>");
-            sendMessage(sender, "&e/sr &8[&eundo &8OR &eu&8] &e<undo-amount>");
-            sendMessage(sender, "&e/sr info");
-            sendMessage(sender, "&e/sr reload");
+            messenger.sendMessage(sender, "misc-available_commands");
+            messenger.sendMessage(sender, "misc-replace_command");
+            messenger.sendMessage(sender, "misc-undo_command");
+            messenger.sendMessage(sender, "misc-info_command");
+            messenger.sendMessage(sender, "misc-modify_command");
+            messenger.sendMessage(sender, "misc-reload_command");
         } else {
-            sendMessage(sender, "&eAvailable subcommands:");
-            sendMessage(sender, "&e/sr &8[&ereplace &8OR &er&8] &e<from-id> <to-id>");
-            sendMessage(sender, "&e/sr &8[&eundo &8OR &eu&8] &e<undo-amount>");
-            sendMessage(sender, "&e/sr info");
+            messenger.sendMessage(sender, "misc-available_commands");
+            messenger.sendMessage(sender, "misc-replace_command");
+            messenger.sendMessage(sender, "misc-undo_command");
+            messenger.sendMessage(sender, "misc-info_command");
         }
-    }
-    
-    /**
-     * This method sends a (colored) message to a CommandSender.
-     *
-     * @param sender The CommandSender.
-     * @param message The message, with optional color codes indicated by the
-     * character '&'.
-     */
-    private void sendMessage(CommandSender sender, String message) {
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', Session.getConfig().getPrefix() + message));
     }
 
 }

@@ -1,0 +1,40 @@
+# This file contains all the messages of the plugin. It is important to NOT
+# remove or add any argument declarations (%s) from as string because this
+# will cause issues when the message needs to be displayed. You are however
+# free to move the argument declarations around in a string, as long as the
+# amount of them stays the same. A string can accept color codes if indicated
+# with a '&' character.
+
+err-not_a_player: '&cOnly players can execute this command.'
+err-not_a_number: '&cNot a number &f%s&c.'
+err-not_enough_arguments: '&cNot enough arguments.'
+err-not_enough_permissions: '&cYou do not have the &f%s &cpermission.'
+err-unknown_subcommand: '&cUnknown subcommand &f%s&c.'
+
+cmd-modify-modified_prefix: '&6Prefix has been changed to: &r%s'
+cmd-modify-modified_max_snapshots: '&6Max undo limit has been changed to: &e%s'
+cmd-modify-modified_max_limit: '&6Max block change has been changed to: &e'
+cmd-modify-unknown_modifier: '&cUnknown modifier. Available modifiers:'
+cmd-modify-available_modifier: '&fprefix&e, &fmax-undo-limit &eor &fmax-block-change'
+cmd-modify-usage: '&cUsage: &f/sr modify [type] [value]'
+cmd-info-version: '&6Version &ev%s'
+cmd-undo-usage: '&cUsage: &f/sr u [number]'
+cmd-undo-nothing_left: '&cNothing left to undo.'
+cmd-undo-rollback: '&6Rollbacked &e%s &6blocks.'
+cmd-replace-no_selection: '&cMake a region selection first.'
+cmd-replace-nothing_found: '&cNothing found to replace.'
+cmd-replace-limit_reached: '&cMaximum block change limit of &f%s &cblocks reached.'
+cmd-replace-replaced_blocks: '&6Replaced &e%s &6blocks.'
+cmd-replace-hold_block: '&cHold the stair or slab you want to replace the stairs or slabs to in your hand.'
+cmd-replace-invalid_id: '&cThe provided ID in &f%s &cis not a number or is an invalid format. Supported formats: "id", "id:data" or "id;data".'
+cmd-replace-invalid_data: '&cThe provided metadata in &f%s &cis not a number between 0-16 or is an invalid format. Supported formats: "id", "id:data" or "id;data".'
+cmd-replace-invalid_block: '&cProvided ID and data &f%s &cis not a stair or a slab.'
+cmd-replace-invalid-blocks: '&cProvided ID and data &f%s &cor &f%s &cis not a stair or a slab.'
+cmd-reload-reloaded: '&6Reloaded the configuration file.'
+
+misc-available_commands: '&eAvailable subcommands:'
+misc-replace_command: '&e/sr &8[&ereplace &8OR &er&8] &e<from-id> <to-id>'
+misc-undo_command: '&e/sr &8[&eundo &8OR &eu&8] &e<undo-amount>'
+misc-info_command: '&e/sr info'
+misc-modify_command: '&e/sr modify &8[&etype&8] &8[&evalue&8]'
+misc-reload_command: '&e/sr reload'
